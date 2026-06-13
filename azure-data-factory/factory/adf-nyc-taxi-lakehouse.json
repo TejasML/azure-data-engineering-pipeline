@@ -1,0 +1,15 @@
+{
+	"name": "adf-nyc-taxi-lakehouse",
+	"properties": {
+		"trustModeClaimForMi": {
+			"value": "Disabled",
+			"editable": true
+		}
+	},
+	"location": "centralindia",
+	"identity": {
+		"type": "SystemAssigned",
+		"principalId": "993b8fe2-dce8-4f3e-876f-ad1bd8948dee",
+		"tenantId": "ce6d0148-f0dd-4435-bf64-2c30b6c89ca2"
+	}
+}

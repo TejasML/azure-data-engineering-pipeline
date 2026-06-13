@@ -1,0 +1,18 @@
+{
+	"name": "DS_ZONE_LOOKUP_SOURCE",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "LS_NYC_TAXI_SOURCE",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "Binary",
+		"typeProperties": {
+			"location": {
+				"type": "HttpServerLocation",
+				"relativeUrl": "misc/taxi_zone_lookup.csv"
+			}
+		}
+	},
+	"type": "Microsoft.DataFactory/factories/datasets"
+}

@@ -1,0 +1,26 @@
+{
+	"name": "DS_RAW_TAXI_FILES",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "LS_NYC_TAXI_SOURCE",
+			"type": "LinkedServiceReference"
+		},
+		"parameters": {
+			"relative_url": {
+				"type": "string"
+			}
+		},
+		"annotations": [],
+		"type": "Binary",
+		"typeProperties": {
+			"location": {
+				"type": "HttpServerLocation",
+				"relativeUrl": {
+					"value": "@dataset().relative_url",
+					"type": "Expression"
+				}
+			}
+		}
+	},
+	"type": "Microsoft.DataFactory/factories/datasets"
+}
