@@ -340,4 +340,4 @@ Through this project, I gained hands-on experience with:
 
 
 ## Power BI
-* Build a interactive dashbord using 
+* Build a interactive dashbord using powerbi to demostrate the 
