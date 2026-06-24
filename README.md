@@ -393,19 +393,16 @@ Using a `Standard_D4ds_v4` single-node cluster instead of a multi-node cluster e
 **2. 15-Minute Auto-Termination**
 The cluster shuts down automatically after 15 minutes of inactivity. Since ADF triggers notebooks sequentially (Bronze → Silver → Gold), the cluster stays active only during active processing and terminates immediately after the Gold notebook completes. No idle compute billing.
 
-**3. Delta Lake `VACUUM` on Gold Layer**
-After each pipeline run, `VACUUM` removes obsolete Delta transaction log files and old data versions. This prevents Gold layer storage from ballooning across multiple runs and keeps storage costs flat.
-
-**4. Broadcast Join for Zone Lookup**
+**3. Broadcast Join for Zone Lookup**
 The `taxi_zone_lookup` table (265 rows) is broadcast to all Spark executors during the Silver enrichment join. This avoids a shuffle join (which would require data redistribution across nodes), reducing both execution time and any network egress that would otherwise occur.
 
-**5. Partitioned Writes in Silver and Gold**
+**4. Partitioned Writes in Silver and Gold**
 Silver and Gold Delta tables are partitioned by `pickup_year` and `pickup_month`. Power BI date-filtered queries only scan the relevant partitions — reducing SQL Warehouse scan cost and query latency.
 
-**6. ADF Metadata-Driven Pattern (vs Hardcoded Pipelines)**
+**5. ADF Metadata-Driven Pattern (vs Hardcoded Pipelines)**
 Running one parameterized pipeline instead of N individual pipelines means fewer ADF activity execution charges and zero duplicated pipeline management overhead.
 
-**7. NAT Gateway (Identified Cost Driver)**
+**6. NAT Gateway (Identified Cost Driver)**
 The NAT Gateway was the largest single cost contributor — required for Databricks clusters in a private VNet to reach the public internet (for NYC TLC HTTP downloads). In a cost-optimized production setup, this would be replaced with an **Azure Private Endpoint** for ADLS and a **Service Endpoint** for ADF, eliminating the NAT Gateway entirely for most traffic.
 
 ---
