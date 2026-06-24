@@ -1,10 +1,11 @@
 # 🚖 NYC Yellow Taxi — Azure Data Engineering Pipeline
 
-![Azure](https://img.shields.io/badge/Azure-Data%20Engineering-0078D4?style=for-the-badge&logo=microsoftazure&logoColor=white)
-![Databricks](https://img.shields.io/badge/Databricks-PySpark-FF3621?style=for-the-badge&logo=databricks&logoColor=white)
-![Delta Lake](https://img.shields.io/badge/Delta%20Lake-Medallion%20Architecture-00ADD8?style=for-the-badge)
-![Power BI](https://img.shields.io/badge/Power%20BI-Reporting-F2C811?style=for-the-badge&logo=powerbi&logoColor=black)
-![Status](https://img.shields.io/badge/Status-Complete-brightgreen?style=for-the-badge)
+[![Azure](https://img.shields.io/badge/Azure-Data%20Engineering-0078D4?style=for-the-badge&logo=microsoftazure&logoColor=white)](https://azure.microsoft.com)
+[![Databricks](https://img.shields.io/badge/Databricks-17.3%20LTS-FF3621?style=for-the-badge&logo=databricks&logoColor=white)](https://databricks.com)
+[![Delta Lake](https://img.shields.io/badge/Delta%20Lake-Medallion%20Architecture-003366?style=for-the-badge)](https://delta.io)
+[![PySpark](https://img.shields.io/badge/PySpark-ETL%20Processing-E25A1C?style=for-the-badge&logo=apachespark&logoColor=white)](https://spark.apache.org)
+[![Power BI](https://img.shields.io/badge/Power%20BI-Analytics%20Reporting-F2C811?style=for-the-badge&logo=powerbi&logoColor=black)](https://powerbi.microsoft.com)
+[![Status](https://img.shields.io/badge/Status-Complete-28a745?style=for-the-badge)](https://github.com/TejasML/azure-data-engineering-pipeline)
 
 > End-to-end cloud data engineering pipeline that ingests, transforms, and models **30M+ NYC Yellow Taxi trip records** using a fully automated, metadata-driven Medallion Architecture on Azure.
 
