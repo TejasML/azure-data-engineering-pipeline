@@ -374,14 +374,15 @@ azure-data-engineering-pipeline/
 
 ### Cost Breakdown
 
-| Service                  | Contribution  | Notes                                                  |
+| Service | Cost | Notes |
 | ------------------------ | ------------- | ------------------------------------------------------ |
-| NAT Gateway              | ~40% (major)  | Outbound internet for HTTP downloads from NYC TLC      |
-| Azure Databricks         | ~35% (major)  | Spark compute for Bronze/Silver/Gold transformations   |
-| Virtual Machines         | ~15% (secondary) | Underlying VM for Databricks node                   |
-| ADLS Gen2 Storage        | ~5%           | Storage of raw Parquet + Delta tables across 4 layers  |
-| Azure Data Factory       | ~3%           | Pipeline runs + activity executions                    |
-| Azure Key Vault          | ~2%           | Secret read operations                                 |
+| NAT Gateway | ₹571.47 | Outbound internet for HTTP downloads from NYC TLC |
+| Azure Databricks | ₹336.25 | Spark compute for Bronze/Silver/Gold transformations |
+| Virtual Machines | ₹228.04 | Underlying VM for Databricks single-node cluster |
+| Virtual Network | ₹63.31 | Network infrastructure for resource communication |
+| ADLS Gen2 Storage | ₹53.09 | Storage of raw Parquet + Delta tables across 4 layers |
+| Azure Data Factory v2 | ₹17.38 | Pipeline runs, activity executions + secret reads |
+| **Total** | **₹1,269.54** | |
 
 ### Cost Optimization Decisions
 
