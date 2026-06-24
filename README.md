@@ -104,7 +104,7 @@ Instead of hardcoding file paths, the pipeline reads a `months.json` config stor
 ]
 ```
 
-![ADF Pipeline Overview](project-assets/adf_pipeline.png)
+![ADF Pipeline Overview](project-assets/adf/adf_pipeline.png)
 
 **ADF Pipeline Activities:**
 
