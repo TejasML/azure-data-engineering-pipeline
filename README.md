@@ -229,10 +229,6 @@ One row per taxi trip. All dimension lookups are pre-resolved to surrogate keys,
 | `total_amount`        | Measure | Total charged to passenger           |
 | `trip_duration_minutes` | Measure | Calculated trip duration           |
 
-**Gold layer optimizations applied:**
-- `OPTIMIZE` + `ZORDER BY (pickup_zone_key, date_key)` — co-locates the most commonly filtered columns
-- `VACUUM` — removes obsolete Delta files to reduce storage cost
-- Partitioned by `pickup_year`, `pickup_month` — Power BI date-range filters hit only relevant partitions
 
 ---
 
