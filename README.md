@@ -235,18 +235,6 @@ The Gold layer is optimized for reporting and business intelligence workloads.
 
 ---
 
-# 📊 Data Quality Checks
-
-The project includes multiple validation steps:
-
-* Null value analysis
-* Schema validation
-* Data type verification
-* Invalid trip filtering
-* Trip duration validation
-* Gold layer verification
-
----
 
 # 🚀 Pipeline Execution
 
@@ -281,20 +269,265 @@ Gold Notebook
 ```
 azure-data-engineering-pipeline/
 
+nyc-taxi-lakehouse-azure/
+│
+├── README.md
+│
+├── architecture/
+│   ├── solution_architecture.png
+│   └── star_schema.png
+│
 ├── azure-data-factory/
-├── databricks/
-│   ├── 01_Bronze_Layer.py
-│   ├── 02_Silver_Layer.py
-│   └── 03_Gold_Layer.py
+│   ├── dataset/
+│   ├── factory/
+│   ├── linkedService/
+│   └── pipeline/
 │
 ├── config/
-│   └── config.json
+│   └── months.json
 │
-├── screenshots/
+├── databricks/
+│   ├── bronze_notebook.py
+│   ├── silver_notebook.py
+│   └── gold_notebook.py
 │
-└── README.md
+├── sql/
+│   └── nyc_taxi_queries.sql
+│
+└── project-assets/
+  ├── adf/
+  ├── databricks/
+  └── powerbi/
 ```
+2. Azure Data Factory Orchestration
 
+ADF orchestrates the entire workflow.
+
+Pipeline Flow
+Read metadata from months.json
+Iterate through each month using ForEach activity
+Download NYC Taxi data through HTTP source
+Store files in ADLS Gen2 Raw Landing Layer
+Execute Databricks Bronze Notebook
+Execute Databricks Silver Notebook
+Execute Databricks Gold Notebook
+Pipeline Screenshot
+
+
+
+
+3. Linked Services
+
+The following Linked Services were configured:
+
+LS_NYC_TAXI_SOURCE
+
+HTTP connection used to access NYC Taxi source data.
+
+LS_ADLS_GEN2
+
+Connection to Azure Data Lake Storage Gen2.
+
+LS_AZURE_DATABRICKS
+
+Connection between Azure Data Factory and Azure Databricks.
+
+Linked Services
+
+
+
+
+4. Azure Data Lake Storage Gen2
+
+The data lake is organized using multiple containers:
+
+raw-landing
+bronze
+silver
+gold
+Raw Landing
+
+Stores source files exactly as received.
+
+Bronze Layer
+
+Stores ingested raw data.
+
+Silver Layer
+
+Stores cleansed and transformed datasets.
+
+Gold Layer
+
+Stores business-ready analytical datasets.
+
+Storage Containers
+
+
+
+
+5. Azure Key Vault & Databricks Secret Scope
+
+To ensure secure credential management, Azure Key Vault was integrated with Databricks.
+
+Why Azure Key Vault?
+Eliminates hardcoded credentials
+Centralized secret management
+Improved security and governance
+Simplified credential rotation
+Databricks Secret Scope
+
+A Databricks Secret Scope was created and linked with Azure Key Vault.
+
+The notebooks securely retrieve credentials using the Secret Scope rather than storing sensitive information in code.
+
+6. Azure Databricks Processing
+
+ADF triggers Databricks notebooks in sequence:
+
+Bronze Notebook
+      ↓
+Silver Notebook
+      ↓
+Gold Notebook
+Notebook Structure
+01_bronze_ingestion
+02_silver_transformation
+03_gold_transformation
+Databricks Workspace
+
+
+
+
+7. Databricks Cluster Configuration
+
+A dedicated cluster was created for data processing.
+
+Cluster Configuration
+Property	Value
+Cluster Name	dataeng-cluster
+Runtime	Databricks Runtime 17.3 LTS
+Node Type	Standard_D4ds_v4
+Memory	16 GB
+Cores	4
+Cluster Type	Single Node
+Auto Termination	15 Minutes
+Unity Catalog	Enabled
+Cluster Screenshot
+
+
+
+
+8. Databricks Jobs
+
+Azure Data Factory triggers Databricks jobs for Bronze, Silver, and Gold processing.
+
+Job Monitoring
+
+
+
+
+9. Spark Processing
+
+The Silver Layer transformation uses Apache Spark and Delta Lake.
+
+The Spark execution plan demonstrates:
+
+Parquet scanning
+Shuffle operations
+WholeStageCodegen optimization
+Distributed processing
+Delta file writing
+Spark Execution Plan
+
+
+
+
+10. Medallion Architecture
+Bronze Layer
+Raw ingestion
+Historical storage
+Minimal transformations
+Silver Layer
+Data cleansing
+Data validation
+Standardization
+Feature engineering
+Gold Layer
+Analytical modeling
+Fact and dimension tables
+Business-ready datasets
+11. Data Modeling
+
+The Gold Layer follows a Star Schema design.
+
+Fact Table
+
+fact_trips
+
+Dimension Tables
+dim_date
+dim_pickup_zone
+dim_dropoff_zone
+dim_payment_type
+Measures
+Trip Distance
+Fare Amount
+Total Amount
+Passenger Count
+Tip Amount
+Trip Duration
+12. Power BI Integration
+
+Power BI connects directly to Databricks SQL Warehouse to provide analytical reporting.
+
+Reporting Features
+Executive Overview
+Trip Analysis
+Revenue Analysis
+Payment Analysis
+Pickup & Dropoff Insights
+Connection Flow
+Gold Layer
+      ↓
+Databricks SQL Warehouse
+      ↓
+Power BI
+Cost Analysis
+
+The project was developed using Azure for Students credits.
+
+Total Cost
+
+₹1,269.56
+
+Major Cost Contributors
+NAT Gateway
+Azure Databricks
+Virtual Machines
+Virtual Network
+Cost Optimization Techniques
+Single-node cluster configuration
+Auto-termination after 15 minutes
+Metadata-driven processing
+Delta Lake storage optimization
+Cost Dashboard
+
+
+
+
+Key Features
+End-to-End Azure Data Engineering Pipeline
+Metadata-Driven Data Ingestion
+Azure Data Factory Orchestration
+Azure Key Vault Integration
+Databricks Secret Scope Configuration
+Medallion Architecture
+Delta Lake Implementation
+Spark-Based Data Processing
+Star Schema Modeling
+Databricks SQL Warehouse
+Power BI Reporting
 ---
 
 # ✨ Key Features
