@@ -7,7 +7,7 @@
 [![Power BI](https://img.shields.io/badge/Power%20BI-Analytics%20Reporting-F2C811?style=for-the-badge&logo=powerbi&logoColor=black)](https://powerbi.microsoft.com)
 [![Status](https://img.shields.io/badge/Status-Complete-28a745?style=for-the-badge)](https://github.com/TejasML/azure-data-engineering-pipeline)
 
--End-to-end cloud data engineering pipeline that ingests, transforms, and models **30M+ NYC Yellow Taxi trip records** using a fully automated, metadata-driven Medallion Architecture on Azure.
+- End-to-end cloud data engineering pipeline that ingests, transforms, and models **30M+ NYC Yellow Taxi trip records** using a fully automated, metadata-driven Medallion Architecture on Azure.
 
 ---
 
