@@ -103,10 +103,10 @@ Instead of hardcoding file paths, the pipeline reads a `months.json` configurati
 
 ```json
 [
-  { "year": "2024", "month": "01" },
-  { "year": "2024", "month": "02" },
+  { "year": "2025", "month": "07" },
+  { "year": "2025", "month": "08" },
   ...
-  { "year": "2024", "month": "12" }
+  { "year": "2026", "month": "04" }
 ]
 ```
 
@@ -396,10 +396,11 @@ Developed and tested on **Azure for Students** credits (₹1,269.56 total).
 
 **Cost optimizations applied:**
 
-- Single-node cluster instead of multi-node (reduced DBU consumption)
-- 15-minute auto-termination on idle cluster
-- Metadata-driven batching to minimize redundant pipeline runs
-- Delta Lake Z-ordering and `VACUUM` to reduce storage and query cost
+- Used a single-node Databricks cluster to minimize DBU consumption during development.
+- Configured cluster auto-termination after 15 minutes of inactivity to prevent unnecessary compute charges.
+- Used metadata-driven ingestion (`months.json`) to avoid creating multiple pipelines for each month, reducing maintenance overhead.
+- Leveraged Azure Data Factory orchestration instead of keeping compute resources continuously running.
+- Monitored Azure resource consumption using Azure Cost Analysis to track and optimize project spending.
 
 ![Cost Analysis](project-assets/adf/project_cost_analysis.png)
 
