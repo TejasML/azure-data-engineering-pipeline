@@ -7,7 +7,7 @@
 [![Status](https://img.shields.io/badge/Status-Complete-brightgreen?style=for-the-badge)](https://github.com/TejasML/azure-data-engineering-pipeline)
 [![Data](https://img.shields.io/badge/Dataset-30M%2B%20Records-blue?style=for-the-badge)](https://www.nyc.gov/site/tlc/about/tlc-trip-record-data.page)
 
-> End-to-end cloud data engineering pipeline that ingests, transforms, and models **30M+ NYC Yellow Taxi trip records** using a fully automated, metadata-driven Medallion Architecture on Azure.
+> End-to-end cloud data engineering pipeline that ingests, transforms, and models **36M+ NYC Yellow Taxi trip records** using a fully automated, metadata-driven Medallion Architecture on Azure.
 
 ---
 
@@ -39,7 +39,7 @@ This project demonstrates a production-grade **Azure Data Engineering pipeline**
 
 The architecture is **metadata-driven**: a lightweight JSON config controls which monthly datasets are ingested, so the pipeline scales to new months without any code changes. All secrets are managed through **Azure Key Vault** with Databricks Secret Scopes, and all pipeline code is version-controlled via **GitHub integration**.
 
-**Dataset:** [NYC TLC Yellow Taxi Trip Records](https://www.nyc.gov/site/tlc/about/tlc-trip-record-data.page) — monthly Parquet files covering **July 20245– April 2026**, 30M+ rows total.
+**Dataset:** [NYC TLC Yellow Taxi Trip Records](https://www.nyc.gov/site/tlc/about/tlc-trip-record-data.page) — monthly Parquet files covering **July 2025– April 2026**, 36M+ rows total.
 
 ---
 
@@ -89,7 +89,7 @@ REST API (NYC TLC)
 | Table Format    | Delta Lake                                |
 | Analytics       | Databricks SQL Warehouse                  |
 | Security        | Azure Key Vault + Databricks Secret Scope |
-| Reporting       | Power BI (DirectQuery / Import)           |
+| Reporting       | Power BI                                  |
 | Version Control | GitHub (ADF Git Integration)              |
 | Config Format   | JSON (metadata-driven)                    |
 
@@ -139,7 +139,7 @@ The Bronze layer is the raw historical store. Data is ingested as-is from the la
 
 **Tables created:**
 
-- `bronze.yellow_taxi_trips` — raw trip records (30M+ rows)
+- `bronze.yellow_taxi_trips` — raw trip records (36M+ rows)
 - `bronze.taxi_zone_lookup` — NYC taxi zone reference data (265 zones)
 
 **Operations:**
@@ -293,7 +293,7 @@ Benefits:
 | Node Type        | Standard_D4ds_v4             |
 | Memory           | 16 GB RAM, 4 vCores          |
 | Mode             | Single Node                  |
-| Auto-termination | 15 minutes (idle)            |
+| Auto-termination | 15 minutes                   |
 | Unity Catalog    | Enabled                      |
 
 ### ADF Git Integration
@@ -410,7 +410,7 @@ Developed and tested on **Azure for Students** credits (₹1,269.56 total).
 
 | Metric                         | Result                                              |
 |--------------------------------|-----------------------------------------------------|
-| Records processed              | 30M+ NYC Yellow Taxi trip records                   |
+| Records processed              | 36M+ NYC Yellow Taxi trip records                   |
 | Data layers built              | 4 (Raw Landing, Bronze, Silver, Gold)               |
 | Dimension tables               | 4 (`dim_date`, `dim_pickup_zone`, `dim_dropoff_zone`, `dim_payment_type`) |
 | Fact table                     | 1 (`fact_trips`)                                    |
