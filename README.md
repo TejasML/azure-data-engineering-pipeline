@@ -1,275 +1,268 @@
-# 🚖 NYC Yellow Taxi Data Engineering Pipeline
+# 🚖 NYC Yellow Taxi — Azure Data Engineering Pipeline
 
-## 📌 Project Overview
+![Azure](https://img.shields.io/badge/Azure-Data%20Engineering-0078D4?style=for-the-badge&logo=microsoftazure&logoColor=white)
+![Databricks](https://img.shields.io/badge/Databricks-PySpark-FF3621?style=for-the-badge&logo=databricks&logoColor=white)
+![Delta Lake](https://img.shields.io/badge/Delta%20Lake-Medallion%20Architecture-00ADD8?style=for-the-badge)
+![Power BI](https://img.shields.io/badge/Power%20BI-Reporting-F2C811?style=for-the-badge&logo=powerbi&logoColor=black)
+![Status](https://img.shields.io/badge/Status-Complete-brightgreen?style=for-the-badge)
 
-This project demonstrates the design and implementation of an **end-to-end Azure Data Engineering Pipeline** using real-world **NYC Yellow Taxi Trip Data**. The solution follows the **Medallion Architecture (Bronze, Silver, Gold)** and automates the complete data ingestion and transformation process using **Azure Data Factory** and **Azure Databricks**.
+> End-to-end cloud data engineering pipeline that ingests, transforms, and models **30M+ NYC Yellow Taxi trip records** using a fully automated, metadata-driven Medallion Architecture on Azure.
 
-The pipeline is designed to be **metadata-driven**, where a JSON configuration file controls which monthly datasets are ingested, making the solution scalable and easy to maintain.
+---
+
+## 📌 Table of Contents
+
+- [Overview](#-overview)
+- [Architecture](#️-architecture)
+- [Tech Stack](#️-tech-stack)
+- [Pipeline Walkthrough](#-pipeline-walkthrough)
+  - [1. Metadata-Driven Ingestion (ADF)](#1-metadata-driven-ingestion-adf)
+  - [2. Bronze Layer — Raw Ingestion](#2-bronze-layer--raw-ingestion)
+  - [3. Silver Layer — Cleansing & Transformation](#3-silver-layer--cleansing--transformation)
+  - [4. Gold Layer — Star Schema Modeling](#4-gold-layer--star-schema-modeling)
+- [Infrastructure & Security](#-infrastructure--security)
+- [Power BI Dashboard](#-power-bi-dashboard)
+- [Project Structure](#-project-structure)
+- [Cost Breakdown](#-cost-breakdown)
+- [Key Outcomes](#-key-outcomes)
+- [Future Enhancements](#-future-enhancements)
+
+---
+
+## 🗺 Overview
+
+This project demonstrates a production-grade **Azure Data Engineering pipeline** built on real-world NYC Yellow Taxi Trip Records. The pipeline automates everything from raw data ingestion to analytical modeling — orchestrated by **Azure Data Factory** and processed through **Azure Databricks** with **Delta Lake** at each layer.
+
+The architecture is **metadata-driven**: a lightweight JSON config controls which monthly datasets are ingested, so the pipeline scales to new months without any code changes.
+
+**Dataset:** [NYC TLC Yellow Taxi Trip Records](https://www.nyc.gov/site/tlc/about/tlc-trip-record-data.page) — monthly Parquet files, 30M+ rows
 
 ---
 
 ## 🏗️ Architecture
 
 ```
-NYC Taxi Website
-        │
-        ▼
-HTTP Source
-        │
-        ▼
-Azure Data Factory
-        │
-        ▼
-Lookup Activity
-        │
-        ▼
-ForEach Activity
-        │
-        ▼
-Copy Activity
-        │
-        ▼
-Azure Data Lake Storage Gen2
-        │
-        ▼
-Azure Databricks
-        │
-        ▼
-Bronze Layer
-        │
-        ▼
-Silver Layer
-        │
-        ▼
-Gold Layer (Star Schema)
+┌─────────────────────────────────────────────────────────────────┐
+│                     INGESTION (ADF)                             │
+│                                                                 │
+│  months.json ──► Lookup ──► ForEach ──► Copy Activity           │
+│                                              │                  │
+│                                              ▼                  │
+│                                    ADLS Gen2 (raw-landing)      │
+└──────────────────────────────────────────────────────┬──────────┘
+                                                       │
+                             ┌─────────────────────────▼──────────────────────────┐
+                             │              MEDALLION ARCHITECTURE (Databricks)    │
+                             │                                                     │
+                             │  Raw Landing ──► Bronze ──► Silver ──► Gold         │
+                             │                  (Delta)    (Delta)   (Star Schema) │
+                             └─────────────────────────────────────────┬───────────┘
+                                                                       │
+                                          ┌────────────────────────────▼──┐
+                                          │   Databricks SQL Warehouse     │
+                                          │              │                 │
+                                          │           Power BI             │
+                                          └───────────────────────────────┘
 ```
 
 ---
 
-## ⚙️ Technologies Used
+## ⚙️ Tech Stack
 
-* Azure Data Factory (ADF)
-* Azure Data Lake Storage Gen2 (ADLS Gen2)
-* Azure Databricks
-* Apache Spark (PySpark)
-* Delta Lake
-* GitHub
-* JSON Configuration
-* Medallion Architecture
-
----
-
-## 📂 Data Source
-
-Dataset: **NYC Yellow Taxi Trip Records**
-
-The pipeline dynamically downloads monthly Parquet files from the NYC Taxi public dataset using a metadata-driven approach.
+| Layer | Technology |
+|---|---|
+| Orchestration | Azure Data Factory (ADF) |
+| Storage | Azure Data Lake Storage Gen2 (ADLS Gen2) |
+| Compute | Azure Databricks (Runtime 17.3 LTS) |
+| Processing | Apache Spark / PySpark |
+| Table Format | Delta Lake |
+| Security | Azure Key Vault + Databricks Secret Scope |
+| Reporting | Power BI (via Databricks SQL Warehouse) |
+| Version Control | GitHub |
+| Config Format | JSON (metadata-driven) |
 
 ---
 
-## 🔄 Metadata-Driven Ingestion
+## 🔄 Pipeline Walkthrough
 
-Instead of hardcoding file names, the pipeline reads a JSON configuration file.
+### 1. Metadata-Driven Ingestion (ADF)
 
-Example:
+Instead of hardcoding file paths, the pipeline reads a `months.json` configuration file stored in ADLS Gen2. ADF dynamically resolves source URLs and downloads the corresponding NYC Taxi Parquet files.
 
 ```json
 [
-    {
-        "year": "2025",
-        "month": "07"
-    },
-    {
-        "year": "2025",
-        "month": "08"
-    }
+  { "year": "2024", "month": "01" },
+  { "year": "2024", "month": "02" }
 ]
 ```
 
-Azure Data Factory dynamically generates the source file names and downloads the required datasets.
+**ADF Pipeline Activities:**
 
-This approach allows new data to be ingested by simply updating the configuration file without modifying the pipeline.
+| Step | Activity | Description |
+|---|---|---|
+| 1 | Lookup | Reads `months.json` from ADLS Gen2 |
+| 2 | ForEach | Iterates over each year/month entry |
+| 3 | Copy Activity | Downloads Parquet file via HTTP; lands in `raw-landing` |
+| 4 | Databricks Bronze | Triggers bronze ingestion notebook |
+| 5 | Databricks Silver | Triggers silver transformation notebook |
+| 6 | Databricks Gold | Triggers gold modeling notebook |
 
----
-
-# 📥 Azure Data Factory Pipeline
-
-The ADF pipeline performs the following tasks:
-
-### 1. Lookup Activity
-
-* Reads the JSON configuration file.
-
-### 2. ForEach Activity
-
-* Iterates through each year and month.
-
-### 3. Copy Activity
-
-* Downloads NYC Taxi Parquet files.
-* Stores raw data in ADLS Gen2.
-
-### 4. Databricks Bronze Notebook
-
-* Loads raw data into Bronze Delta tables.
-
-### 5. Databricks Silver Notebook
-
-* Cleans and transforms the data.
-
-### 6. Databricks Gold Notebook
-
-* Creates analytical data models.
-
-The entire process is automated and can be triggered with a single pipeline execution.
+**Linked Services configured:**
+- `LS_NYC_TAXI_SOURCE` — HTTP connection to NYC TLC public data
+- `LS_ADLS_GEN2` — Azure Data Lake Storage Gen2
+- `LS_AZURE_DATABRICKS` — ADF → Databricks job trigger
 
 ---
 
-# 🥉 Bronze Layer
+### 2. Bronze Layer — Raw Ingestion
 
-The Bronze layer stores raw ingested data with minimal transformation.
+The Bronze layer is the raw historical store. Data is ingested as-is from the landing zone and written to Delta tables with no schema changes.
 
-### Bronze Tables
+**Tables:**
+- `bronze.yellow_taxi_trips` — raw trip records
+- `bronze.taxi_zone_lookup` — NYC taxi zone reference data
 
-* Yellow Taxi Trip Data
-* Taxi Zone Lookup Data
-
-### Operations
-
-* Read raw Parquet files
-* Store data as Delta tables
-* Preserve original schema
-* Maintain raw historical data
+**Operations:**
+- Read raw Parquet from `raw-landing`
+- Register as Delta tables
+- Preserve original schema and all historical records
 
 ---
 
-# 🥈 Silver Layer
+### 3. Silver Layer — Cleansing & Transformation
 
-The Silver layer focuses on data quality and transformation.
+The Silver layer enforces data quality and enriches the dataset for downstream modeling.
 
-### Data Cleaning
+**Data Quality Filters applied:**
+- Removed trips with zero or negative `passenger_count`
+- Removed trips with zero or negative `trip_distance`
+- Removed trips with invalid or negative `fare_amount` / `total_amount`
+- Removed trips with negative `trip_duration`
 
-* Removed invalid passenger counts
-* Removed invalid trip distances
-* Removed invalid fare amounts
-* Removed invalid total amounts
-* Removed negative trip durations
+**Feature Engineering — new columns derived:**
 
-### Feature Engineering
+| Feature | Description |
+|---|---|
+| `pickup_year` | Extracted from `tpep_pickup_datetime` |
+| `pickup_month` | Extracted from `tpep_pickup_datetime` |
+| `pickup_day` | Extracted from `tpep_pickup_datetime` |
+| `pickup_hour` | Extracted from `tpep_pickup_datetime` |
+| `trip_duration_minutes` | Calculated from pickup/dropoff timestamps |
 
-Created additional analytical features:
-
-* Pickup Year
-* Pickup Month
-* Pickup Day
-* Pickup Hour
-* Trip Duration (Minutes)
-
-### Lookup Enrichment
-
-Joined Taxi Zone Lookup table to generate:
-
-* Pickup Borough
-* Pickup Zone
-* Pickup Service Zone
-* Dropoff Borough
-* Dropoff Zone
-* Dropoff Service Zone
+**Lookup Enrichment** — Taxi Zone lookup joined to produce:
+- `pickup_borough`, `pickup_zone`, `pickup_service_zone`
+- `dropoff_borough`, `dropoff_zone`, `dropoff_service_zone`
 
 ---
 
-# 🥇 Gold Layer
+### 4. Gold Layer — Star Schema Modeling
 
-The Gold layer is designed using a **Star Schema** for analytical workloads.
+The Gold layer is optimized for analytical workloads and BI reporting, modeled as a Star Schema.
 
-## Dimension Tables
+#### Dimension Tables
 
-### Dim Date
+| Table | Description |
+|---|---|
+| `dim_date` | Calendar attributes — year, month, day, hour |
+| `dim_pickup_zone` | Pickup location details — borough, zone, service zone |
+| `dim_dropoff_zone` | Dropoff location details — borough, zone, service zone |
+| `dim_payment_type` | Payment code to description mapping |
 
-Contains calendar-related attributes.
+#### Fact Table
 
-### Dim Pickup Zone
+**`fact_trips`** — one row per trip, containing:
+- `date_key` → FK to `dim_date`
+- `pickup_zone_key` → FK to `dim_pickup_zone`
+- `dropoff_zone_key` → FK to `dim_dropoff_zone`
+- `payment_type_key` → FK to `dim_payment_type`
+- Measures: `trip_distance`, `fare_amount`, `tip_amount`, `total_amount`, `passenger_count`, `trip_duration_minutes`
 
-Contains pickup location details.
-
-### Dim Dropoff Zone
-
-Contains dropoff location details.
-
-### Dim Payment Type
-
-Maps payment codes to descriptions.
-
----
-
-## Fact Table
-
-### Fact Trips
-
-Contains:
-
-* Trip Metrics
-* Fare Information
-* Passenger Count
-* Trip Distance
-* Date Key
-* Pickup Zone Key
-* Dropoff Zone Key
-* Payment Type Key
-
----
-
-# ⭐ Star Schema
+#### Star Schema Diagram
 
 ```
-                 Dim Date
-                     │
-                     │
-Dim Pickup ─── Fact Trips ─── Dim Dropoff
-                     │
-                     │
-             Dim Payment Type
-```
-
-The Gold layer is optimized for reporting and business intelligence workloads.
-
----
-
-
-# 🚀 Pipeline Execution
-
-The pipeline is fully automated.
-
-```
-Trigger Pipeline
-        │
-        ▼
-Lookup
-        │
-        ▼
-ForEach
-        │
-        ▼
-Copy Activity
-        │
-        ▼
-Bronze Notebook
-        │
-        ▼
-Silver Notebook
-        │
-        ▼
-Gold Notebook
+                    ┌──────────────┐
+                    │   dim_date   │
+                    └──────┬───────┘
+                           │
+ ┌──────────────────┐      │      ┌───────────────────┐
+ │  dim_pickup_zone ├──────┼──────┤  dim_dropoff_zone  │
+ └──────────────────┘      │      └───────────────────┘
+                    ┌──────▼───────┐
+                    │  fact_trips  │
+                    └──────┬───────┘
+                           │
+                    ┌──────▼───────────┐
+                    │  dim_payment_type │
+                    └──────────────────┘
 ```
 
 ---
 
-# 📁 Project Structure
+## 🔐 Infrastructure & Security
+
+### ADLS Gen2 Container Structure
+
+```
+adls-account/
+├── raw-landing/   # Source Parquet files (as-received)
+├── bronze/        # Delta tables — raw ingested data
+├── silver/        # Delta tables — cleansed & enriched
+└── gold/          # Delta tables — star schema (fact + dims)
+```
+
+### Azure Key Vault + Databricks Secret Scope
+
+All credentials (storage account keys, connection strings) are stored in **Azure Key Vault** and accessed from Databricks notebooks via a **Secret Scope** — no hardcoded secrets anywhere in the codebase.
+
+Benefits:
+- Centralized credential management
+- Easy secret rotation without notebook changes
+- Audit trail and access control via Azure RBAC
+
+### Databricks Cluster Configuration
+
+| Property | Value |
+|---|---|
+| Runtime | Databricks Runtime 17.3 LTS |
+| Node Type | Standard_D4ds_v4 |
+| Memory | 16 GB RAM, 4 vCores |
+| Mode | Single Node |
+| Auto-termination | 15 minutes (idle) |
+| Unity Catalog | Enabled |
+
+---
+
+## 📊 Power BI Dashboard
+
+Power BI connects directly to the **Databricks SQL Warehouse** (no export needed) and reports over the Gold layer Star Schema.
+
+**Dashboard Pages:**
+
+| Page | Focus |
+|---|---|
+| Executive Overview | High-level KPIs — total trips, revenue, avg fare |
+| Trip Analysis | Temporal patterns — hour, day, month trends |
+| Revenue Analysis | Fare breakdown, tip rates, surge patterns |
+| Payment Analysis | Payment type distribution and trends |
+| Pickup & Dropoff Insights | Zone-level heatmaps and top corridors |
+
+**Connection flow:**
+```
+Gold Layer (Delta Tables)
+        │
+        ▼
+Databricks SQL Warehouse
+        │
+        ▼
+Power BI (DirectQuery / Import)
+```
+
+---
+
+## 📁 Project Structure
 
 ```
 azure-data-engineering-pipeline/
-
-nyc-taxi-lakehouse-azure/
 │
 ├── README.md
 │
@@ -284,293 +277,73 @@ nyc-taxi-lakehouse-azure/
 │   └── pipeline/
 │
 ├── config/
-│   └── months.json
+│   └── months.json               # Metadata config — controls which months to ingest
 │
 ├── databricks/
-│   ├── bronze_notebook.py
-│   ├── silver_notebook.py
-│   └── gold_notebook.py
+│   ├── 01_bronze_ingestion.py
+│   ├── 02_silver_transformation.py
+│   └── 03_gold_modeling.py
 │
 ├── sql/
 │   └── nyc_taxi_queries.sql
 │
 └── project-assets/
-  ├── adf/
-  ├── databricks/
-  └── powerbi/
+    ├── adf/                      # ADF pipeline screenshots
+    ├── databricks/               # Notebook & cluster screenshots
+    └── powerbi/                  # Dashboard screenshots
 ```
-2. Azure Data Factory Orchestration
-
-ADF orchestrates the entire workflow.
-
-Pipeline Flow
-Read metadata from months.json
-Iterate through each month using ForEach activity
-Download NYC Taxi data through HTTP source
-Store files in ADLS Gen2 Raw Landing Layer
-Execute Databricks Bronze Notebook
-Execute Databricks Silver Notebook
-Execute Databricks Gold Notebook
-Pipeline Screenshot
-
-
-
-
-3. Linked Services
-
-The following Linked Services were configured:
-
-LS_NYC_TAXI_SOURCE
-
-HTTP connection used to access NYC Taxi source data.
-
-LS_ADLS_GEN2
-
-Connection to Azure Data Lake Storage Gen2.
-
-LS_AZURE_DATABRICKS
-
-Connection between Azure Data Factory and Azure Databricks.
-
-Linked Services
-
-
-
-
-4. Azure Data Lake Storage Gen2
-
-The data lake is organized using multiple containers:
-
-raw-landing
-bronze
-silver
-gold
-Raw Landing
-
-Stores source files exactly as received.
-
-Bronze Layer
-
-Stores ingested raw data.
-
-Silver Layer
-
-Stores cleansed and transformed datasets.
-
-Gold Layer
-
-Stores business-ready analytical datasets.
-
-Storage Containers
-
-
-
-
-5. Azure Key Vault & Databricks Secret Scope
-
-To ensure secure credential management, Azure Key Vault was integrated with Databricks.
-
-Why Azure Key Vault?
-Eliminates hardcoded credentials
-Centralized secret management
-Improved security and governance
-Simplified credential rotation
-Databricks Secret Scope
-
-A Databricks Secret Scope was created and linked with Azure Key Vault.
-
-The notebooks securely retrieve credentials using the Secret Scope rather than storing sensitive information in code.
-
-6. Azure Databricks Processing
-
-ADF triggers Databricks notebooks in sequence:
-
-Bronze Notebook
-      ↓
-Silver Notebook
-      ↓
-Gold Notebook
-Notebook Structure
-01_bronze_ingestion
-02_silver_transformation
-03_gold_transformation
-Databricks Workspace
-
-
-
-
-7. Databricks Cluster Configuration
-
-A dedicated cluster was created for data processing.
-
-Cluster Configuration
-Property	Value
-Cluster Name	dataeng-cluster
-Runtime	Databricks Runtime 17.3 LTS
-Node Type	Standard_D4ds_v4
-Memory	16 GB
-Cores	4
-Cluster Type	Single Node
-Auto Termination	15 Minutes
-Unity Catalog	Enabled
-Cluster Screenshot
-
-
-
-
-8. Databricks Jobs
-
-Azure Data Factory triggers Databricks jobs for Bronze, Silver, and Gold processing.
-
-Job Monitoring
-
-
-
-
-9. Spark Processing
-
-The Silver Layer transformation uses Apache Spark and Delta Lake.
-
-The Spark execution plan demonstrates:
-
-Parquet scanning
-Shuffle operations
-WholeStageCodegen optimization
-Distributed processing
-Delta file writing
-Spark Execution Plan
-
-
-
-
-10. Medallion Architecture
-Bronze Layer
-Raw ingestion
-Historical storage
-Minimal transformations
-Silver Layer
-Data cleansing
-Data validation
-Standardization
-Feature engineering
-Gold Layer
-Analytical modeling
-Fact and dimension tables
-Business-ready datasets
-11. Data Modeling
-
-The Gold Layer follows a Star Schema design.
-
-Fact Table
-
-fact_trips
-
-Dimension Tables
-dim_date
-dim_pickup_zone
-dim_dropoff_zone
-dim_payment_type
-Measures
-Trip Distance
-Fare Amount
-Total Amount
-Passenger Count
-Tip Amount
-Trip Duration
-12. Power BI Integration
-
-Power BI connects directly to Databricks SQL Warehouse to provide analytical reporting.
-
-Reporting Features
-Executive Overview
-Trip Analysis
-Revenue Analysis
-Payment Analysis
-Pickup & Dropoff Insights
-Connection Flow
-Gold Layer
-      ↓
-Databricks SQL Warehouse
-      ↓
-Power BI
-Cost Analysis
-
-The project was developed using Azure for Students credits.
-
-Total Cost
-
-₹1,269.56
-
-Major Cost Contributors
-NAT Gateway
-Azure Databricks
-Virtual Machines
-Virtual Network
-Cost Optimization Techniques
-Single-node cluster configuration
-Auto-termination after 15 minutes
-Metadata-driven processing
-Delta Lake storage optimization
-Cost Dashboard
-
-
-
-
-Key Features
-End-to-End Azure Data Engineering Pipeline
-Metadata-Driven Data Ingestion
-Azure Data Factory Orchestration
-Azure Key Vault Integration
-Databricks Secret Scope Configuration
-Medallion Architecture
-Delta Lake Implementation
-Spark-Based Data Processing
-Star Schema Modeling
-Databricks SQL Warehouse
-Power BI Reporting
----
-
-# ✨ Key Features
-
-* End-to-End Azure Data Pipeline
-* Metadata-Driven Ingestion
-* Dynamic File Processing
-* Medallion Architecture
-* Delta Lake Storage
-* Data Quality Validation
-* Feature Engineering
-* Star Schema Design
-* Automated Orchestration with ADF
-* Git Version Control
 
 ---
 
-# 🎯 Learning Outcomes
+## 💰 Cost Breakdown
+
+Developed on **Azure for Students** credits.
+
+| Service | Approx. Cost |
+|---|---|
+| NAT Gateway | Major contributor |
+| Azure Databricks | Major contributor |
+| Virtual Machines | Secondary contributor |
+| Virtual Network | Minor |
+| **Total** | **₹1,269.56** |
+
+**Cost optimization techniques applied:**
+- Single-node cluster (vs multi-node)
+- 15-minute auto-termination on idle
+- Metadata-driven batching to minimize redundant runs
+- Delta Lake storage optimization (Z-ordering, vacuuming)
+
+---
+
+## 🎯 Key Outcomes
 
 Through this project, I gained hands-on experience with:
 
-* Azure Data Factory
-* Azure Databricks
-* PySpark
-* Delta Lake
-* Data Lake Architecture
-* Medallion Architecture
-* Star Schema Modeling
-* ETL/ELT Pipeline Design
-* Metadata-Driven Pipelines
-* Cloud Data Engineering Best Practices
+- Designing and deploying end-to-end cloud data pipelines on Azure
+- Building metadata-driven ADF pipelines with Lookup + ForEach patterns
+- Implementing Medallion Architecture (Bronze / Silver / Gold) with Delta Lake
+- Writing PySpark transformation logic for large-scale datasets
+- Modeling analytical schemas (Star Schema) for BI consumption
+- Securing cloud workloads with Azure Key Vault and Databricks Secret Scopes
+- Integrating Databricks SQL Warehouse with Power BI for live reporting
+- Managing cloud costs with resource configuration best practices
 
 ---
 
-## 📌 Future Enhancements
+## 🚀 Future Enhancements
 
-* Power BI Dashboard Integration
-* Incremental Data Loading
-* Delta MERGE Operations
-* CI/CD Pipeline
-* Automated Scheduling and Monitoring
-* Production Deployment
+- [ ] Incremental loading with Delta `MERGE` (upserts)
+- [ ] Structured Streaming for near-real-time ingestion
+- [ ] SCD Type 2 on dimension tables
+- [ ] CI/CD pipeline with GitHub Actions
+- [ ] Automated pipeline scheduling and alerting
+- [ ] Green and FHV taxi dataset integration for multi-modal analysis
+- [ ] Deployment to production Azure environment
 
+---
 
-## Power BI
-* Build a interactive dashbord using powerbi to demostrate the 
+<div align="center">
+
+Built with ☁️ on Azure &nbsp;|&nbsp; NYC TLC Open Data &nbsp;|&nbsp; Delta Lake + Databricks
+
+</div>
