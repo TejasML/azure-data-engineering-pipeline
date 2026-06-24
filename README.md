@@ -415,7 +415,7 @@ Developed and tested on **Azure for Students** credits.
 | Data layers built              | 4 (Raw Landing, Bronze, Silver, Gold)               |
 | Dimension tables               | 4 (`dim_date`, `dim_pickup_zone`, `dim_dropoff_zone`, `dim_payment_type`) |
 | Fact table                     | 1 (`fact_trips`)                                    |
-| Dashboard pages                | 5 (Executive, Trip, Revenue, Payment, Zone)         |
+| Dashboard pages                | Dashboard Pages	2 (Executive Overview and Interactive Business Analytics) |
 | Security                       | Zero hardcoded secrets — 100% Key Vault managed     |
 | Pipeline design                | Metadata-driven — add new months via config only    |
 | Storage format                 | Delta Lake throughout (ACID, time travel enabled)   |
