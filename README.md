@@ -39,7 +39,7 @@ This project demonstrates a production-grade **Azure Data Engineering pipeline**
 
 The architecture is **metadata-driven**: a lightweight JSON config controls which monthly datasets are ingested, so the pipeline scales to new months without any code changes. All secrets are managed through **Azure Key Vault** with Databricks Secret Scopes, and all pipeline code is version-controlled via **GitHub integration**.
 
-**Dataset:** [NYC TLC Yellow Taxi Trip Records](https://www.nyc.gov/site/tlc/about/tlc-trip-record-data.page) — monthly Parquet files covering **Jan 2024 – Dec 2024**, 30M+ rows total.
+**Dataset:** [NYC TLC Yellow Taxi Trip Records](https://www.nyc.gov/site/tlc/about/tlc-trip-record-data.page) — monthly Parquet files covering **July 20245– April 2026**, 30M+ rows total.
 
 ---
 
