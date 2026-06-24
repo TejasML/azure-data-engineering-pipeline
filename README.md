@@ -383,16 +383,17 @@ azure-data-engineering-pipeline/
 
 ## 💰 Cost Breakdown
 
-Developed and tested on **Azure for Students** credits (₹1,269.56 total).
+Developed and tested on **Azure for Students** credits.
 
-| Service              | Approx. Cost  | Notes                                |
-|----------------------|---------------|--------------------------------------|
-| Azure Databricks     | ₹620          | Compute for Bronze/Silver/Gold runs  |
-| NAT Gateway          | ₹390          | Required for Databricks VNet egress  |
-| Virtual Machines     | ₹180          | Databricks cluster nodes             |
-| Azure Data Factory   | ₹50           | Pipeline activity runs               |
-| ADLS Gen2 + Network  | ₹29.56        | Storage and VNet overhead            |
-| **Total**            | **₹1,269.56** |                                      |
+| Service             | Approx. Cost (₹) | Notes                                             |
+| ------------------- | ---------------: | ------------------------------------------------- |
+| NAT Gateway         |           571.47 | Network egress for Databricks-managed resources   |
+| Azure Databricks    |           336.25 | Databricks DBU consumption for notebook execution |
+| Virtual Machines    |           228.04 | Compute resources used by Databricks cluster      |
+| Virtual Network     |            63.31 | Networking infrastructure                         |
+| Storage (ADLS Gen2) |            53.09 | Raw, Bronze, Silver, and Gold data storage        |
+| Azure Data Factory  |            17.38 | Pipeline activity runs and orchestration          |
+| **Total**           |     **1,269.56** | Actual project cost                               |
 
 **Cost optimizations applied:**
 
@@ -436,10 +437,11 @@ Developed and tested on **Azure for Students** credits (₹1,269.56 total).
 
 - Implement Incremental Loading using Delta Lake `MERGE` operations to support efficient data refreshes and reduce processing costs.
 - Add Structured Streaming for near real-time ingestion and processing of taxi trip data.
+- Implement Delta Lake OPTIMIZE and Z-Ordering for faster query performance.
+- Use Delta Lake VACUUM to manage storage consumption.
 - Implement Slowly Changing Dimensions (SCD Type 2) for historical tracking of dimensional data.
 - Configure Azure Monitor alerts for automated pipeline failure notifications and operational monitoring.
 - Integrate additional NYC Taxi datasets (Green Taxi and FHV) for broader transportation analytics.
-- Optimize Delta Lake tables using partitioning and performance tuning techniques.
 - Enhance Power BI dashboards with advanced KPI tracking and executive-level analytics.
 - Implement a CI/CD workflow using GitHub Actions for automated deployment and version control.
 
