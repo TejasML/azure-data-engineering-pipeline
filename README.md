@@ -2,13 +2,13 @@
 
 # 🚖 NYC Yellow Taxi — Azure Data Engineering Pipeline
 
-**End-to-end cloud data engineering pipeline processing 30M+ NYC Yellow Taxi trip records using a fully automated, metadata-driven Medallion Architecture on Azure.**
-
 [![Azure](https://img.shields.io/badge/Azure-Data%20Engineering-0078D4?style=for-the-badge&logo=microsoftazure&logoColor=white)](https://azure.microsoft.com)
 [![Databricks](https://img.shields.io/badge/Databricks-PySpark-FF3621?style=for-the-badge&logo=databricks&logoColor=white)](https://databricks.com)
 [![Delta Lake](https://img.shields.io/badge/Delta%20Lake-Medallion%20Architecture-00ADD8?style=for-the-badge)](https://delta.io)
 [![Power BI](https://img.shields.io/badge/Power%20BI-Reporting-F2C811?style=for-the-badge&logo=powerbi&logoColor=black)](https://powerbi.microsoft.com)
 [![Status](https://img.shields.io/badge/Status-Complete-brightgreen?style=for-the-badge)](https://github.com/TejasML/azure-data-engineering-pipeline)
+
+**End-to-end cloud data engineering pipeline processing 30M+ NYC Yellow Taxi trip records using a fully automated, metadata-driven Medallion Architecture on Azure.**
 
 </div>
 
