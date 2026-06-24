@@ -129,7 +129,7 @@ Instead of hardcoding file paths, the pipeline reads a `months.json` configurati
 
 > All linked service credentials are pulled securely from **Azure Key Vault** — no secrets in code.
 
-![ADF Pipeline](project-assets/adf/pipeline_overview.png)
+![ADF Pipeline](project-assets/adf/adf_pipeline.png)
 
 ---
 
@@ -300,7 +300,7 @@ Benefits:
 
 Azure Data Factory is integrated with this GitHub repository for source control. All pipelines, datasets, linked services, and factory configurations are versioned — enabling change tracking, rollback, and reproducible deployments.
 
-![Databricks Cluster](project-assets/databricks/cluster_config.png)
+![Databricks Cluster](project-assets/databricks/cluster.png)
 
 ---
 
@@ -326,11 +326,11 @@ Power BI connects directly to the **Databricks SQL Warehouse** (no export needed
 
 ### Azure Data Factory — Pipeline
 
-![ADF Pipeline Run](project-assets/adf/pipeline_run.png)
+![ADF Pipeline Run](project-assets/adf/adf_monitor_success.png)
 
 ### Databricks — Job Run & Workflow
 
-![Databricks Job](project-assets/databricks/job_run.png)
+![Databricks Job](project-assets/databricks/Job.png)
 
 ### Databricks — Spark UI Execution Plan
 
@@ -340,9 +340,6 @@ Power BI connects directly to the **Databricks SQL Warehouse** (no export needed
 
 ![Power BI Revenue](project-assets/powerbi/revenue_analysis.png)
 
-### Cost Analysis
-
-![Cost Analysis](project-assets/cost_analysis.png)
 
 ---
 
@@ -384,79 +381,6 @@ azure-data-engineering-pipeline/
 
 ---
 
-## 🚀 Setup & Reproduction Guide
-
-### Prerequisites
-
-- Active Azure subscription (Azure for Students works)
-- Azure CLI installed locally
-- Power BI Desktop (for dashboard)
-
-### Step 1 — Provision Azure Resources
-
-Create the following resources in a single Resource Group:
-
-```
-- Azure Data Lake Storage Gen2 (with hierarchical namespace enabled)
-- Azure Data Factory
-- Azure Databricks Workspace
-- Azure Key Vault
-```
-
-### Step 2 — Configure ADLS Gen2 Containers
-
-Create four containers in your storage account:
-
-```
-raw-landing / bronze / silver / gold
-```
-
-Upload `config/months.json` to the `raw-landing` container.
-
-### Step 3 — Set Up Azure Key Vault Secrets
-
-Add the following secrets to Key Vault:
-
-| Secret Name         | Value                            |
-|---------------------|----------------------------------|
-| `adls-account-name` | Your storage account name        |
-| `adls-account-key`  | Your storage account access key  |
-
-### Step 4 — Configure Databricks Secret Scope
-
-In Databricks, create a secret scope backed by Azure Key Vault:
-
-```bash
-databricks secrets create-scope --scope kv-scope \
-  --scope-backend-type AZURE_KEYVAULT \
-  --resource-id <key-vault-resource-id> \
-  --dns-name <key-vault-dns-name>
-```
-
-### Step 5 — Import ADF Pipelines
-
-In Azure Data Factory, connect to this GitHub repository via the Git integration settings. ADF will automatically load all pipelines, datasets, and linked services from the `azure-data-factory/` directory.
-
-Update the linked service connection strings to point to your own ADLS Gen2 and Databricks workspace.
-
-### Step 6 — Upload Databricks Notebooks
-
-Upload the notebooks from `databricks/` to your Databricks workspace and attach them to the cluster configured in the Tech Stack section.
-
-### Step 7 — Run the Pipeline
-
-Trigger the ADF pipeline manually or set a scheduled trigger. The pipeline will:
-
-1. Read `months.json` from ADLS Gen2
-2. Download NYC Taxi Parquet files for each month
-3. Sequentially run Bronze → Silver → Gold notebooks via Databricks Jobs
-
-### Step 8 — Connect Power BI
-
-Open Power BI Desktop → Get Data → Databricks → enter your SQL Warehouse connection string. Select the Gold layer tables (`fact_trips`, `dim_*`) and build your dashboard.
-
----
-
 ## 💰 Cost Breakdown
 
 Developed and tested on **Azure for Students** credits (₹1,269.56 total).
@@ -477,7 +401,7 @@ Developed and tested on **Azure for Students** credits (₹1,269.56 total).
 - Metadata-driven batching to minimize redundant pipeline runs
 - Delta Lake Z-ordering and `VACUUM` to reduce storage and query cost
 
-![Cost Analysis](project-assets/cost_analysis.png)
+![Cost Analysis](project-assets/adf/project_cost_analysis.png)
 
 ---
 
@@ -509,24 +433,16 @@ Developed and tested on **Azure for Students** credits (₹1,269.56 total).
 
 ## 🚀 Future Enhancements
 
-**Already implemented ✅**
-- [x] Medallion Architecture (Bronze / Silver / Gold)
-- [x] Metadata-driven ingestion via `months.json`
-- [x] Azure Key Vault + Databricks Secret Scope security
-- [x] Delta Lake with Unity Catalog
-- [x] Star Schema modeling for BI
-- [x] ADF Git integration for version control
-- [x] Databricks Jobs for workflow automation
+- Implement Incremental Loading using Delta Lake `MERGE` operations to support efficient data refreshes and reduce processing costs.
+- Add Structured Streaming for near real-time ingestion and processing of taxi trip data.
+- Implement Slowly Changing Dimensions (SCD Type 2) for historical tracking of dimensional data.
+- Configure Azure Monitor alerts for automated pipeline failure notifications and operational monitoring.
+- Integrate additional NYC Taxi datasets (Green Taxi and FHV) for broader transportation analytics.
+- Optimize Delta Lake tables using partitioning and performance tuning techniques.
+- Enhance Power BI dashboards with advanced KPI tracking and executive-level analytics.
+- Implement a CI/CD workflow using GitHub Actions for automated deployment and version control.
 
-**Planned improvements 🔜**
-- [ ] Incremental loading with Delta `MERGE` (upserts) for efficient re-runs
-- [ ] Structured Streaming for near-real-time ingestion
-- [ ] SCD Type 2 on dimension tables for historical tracking
-- [ ] CI/CD pipeline with GitHub Actions for automated ADF deployment
-- [ ] Automated pipeline scheduling with alerting via Azure Monitor
-- [ ] Green and FHV taxi dataset integration for multi-modal analysis
-- [ ] Deployment to production Azure environment with separate dev/prod workspaces
-
+  
 ---
 
 <div align="center">
