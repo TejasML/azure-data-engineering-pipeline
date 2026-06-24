@@ -1,0 +1,31 @@
+# Power BI
+*.pbix
+
+# adf
+azure-data-factory/ 
+
+# Billing export
+D:\Projects\azure-data-engineering-pipeline\databricks\Detail_BillingAccount_ef05d021-d89d-578c-73e9-6d51767e9647_b13bd8b3-040b-4052-9287-b034a134e90e_2019-05-31_202606_en.csv
+    
+# ADF activity runs export
+adf-nyc-taxi-lakehouse_Activity runs.csv
+
+ Python
+__pycache__/
+*.pyc
+
+# Jupyter
+.ipynb_checkpoints/
+
+# VS Code
+.vscode/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Secrets / Credentials
+.env
+.env.*
+secrets.json
+credentials.json    
